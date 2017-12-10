@@ -1,4 +1,4 @@
-JOB_NAME="mp4-run1"
+JOB_NAME="mp4_run1"
 gcloud ml-engine jobs submit training ${JOB_NAME} \
     --package-path mp4 \
     --module-name mp4.q_learning \

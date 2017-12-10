@@ -1,3 +1,4 @@
+
 import tensorflow as tf
 import cv2
 import pong_game as game
@@ -45,9 +46,9 @@ def weight_variable(shape):
 	return tf.Variable(initial)
 
 def bias_variable(shape):
-    	""" Initializa the bias variable."""
-    	initial = tf.constant(0.01, shape = shape)
-    	return tf.Variable(initial)
+	""" Initializa the bias variable."""
+	initial = tf.constant(0.01, shape = shape)
+	return tf.Variable(initial)
 
 def conv2d(x, W, stride):
 	""" Define a convolutional layer."""
@@ -118,11 +119,14 @@ def get_action_index(readout_t,epsilon,t):
 		action_index: the index of the action to be taken next.
 
 	"""
-    if t < OBSERVE or random.random() <= epsilon:
-        action_index = random.randrange(ACTIONS)
-    else:
-        action_index = np.argmax(readout_t)
-    return action_index
+	if t < OBSERVE or random.random() <= epsilon:
+		action_index = random.randrange(ACTIONS)
+	else:
+		action_index = np.argmax(readout_t)
+	
+	return action_index
+
+
 
 
 def scale_down_epsilon(epsilon,t):
@@ -134,9 +138,11 @@ def scale_down_epsilon(epsilon,t):
 		t: current number of iterations.
 	Returns:
 		the updated epsilon
+
 	"""
 	if epsilon > FINAL_EPSILON and t > OBSERVE:
 		epsilon -= (INITIAL_EPSILON - FINAL_EPSILON) / EXPLORE
+
 	return epsilon
 
 
@@ -155,9 +161,10 @@ def run_selected_action(a_t,s_t,game_state):
 	"""
 	x_t1_col, r_t, terminal = game_state.frame_step(a_t)
 	x_t1 = cv2.cvtColor(cv2.resize(x_t1_col, (80, 80)), cv2.COLOR_BGR2GRAY)
-	ret, x_t1 = cv2.threshold(x_t1,1,255,cv2.THRESH_BINARY)
+	ret, x_t1 = cv2.threshold(x_t1, 1, 255, cv2.THRESH_BINARY)
 	x_t1 = np.reshape(x_t1, (80, 80, 1))
-	s_t1 = np.append(x_t1, s_t[:,:,0:3], axis = 2)
+	s_t1 = np.append(x_t1, s_t[:,:,0:3], axis=2)
+
 	return s_t1,r_t,terminal 
 
 
@@ -169,11 +176,14 @@ def compute_cost(target_q,a_t,q_value):
 		q_value: current Q-value
 	Returns:
 		cost
-	"""
-    readout_action = tf.reduce_sum(tf.multiply(q_value, a_t), reduction_indices=1)
-    cost = tf.reduce_mean(tf.square(target_q - readout_action))
-    return cost
+	""" 
+	# TO DO: Q-value for the action.
 
+	# TO DO: Q-Learning Cost.
+	readout_action = tf.reduce_sum(tf.multiply(q_value, a_t), reduction_indices=1)
+	cost = tf.reduce_mean(tf.square(target_q - readout_action))
+
+	return cost
 
 
 def compute_target_q(next_state_batch,r_batch,readout_j1_batch,minibatch):
@@ -188,14 +198,13 @@ def compute_target_q(next_state_batch,r_batch,readout_j1_batch,minibatch):
 
 	Hint: distinguish two cases: (1) terminal state and (2) non terminal states
 	"""
-    target_q_batch = []
-    for i in range(0, len(minibatch)):
-    	#terminal state
-    	if minibatch[i][4]:
-    		target_q_batch.append(r_batch[i])
-    	else:
-    		target_q_batch.append(r_batch[i] + GAMMA * np.max(readout_j1_batch[i]))
-    		
+	target_q_batch = []
+	for i in range(0, len(minibatch)):
+		if minibatch[i][4]:
+			target_q_batch.append(r_batch[i])
+		else:
+			target_q_batch.append(r_batch[i] + GAMMA * np.max(readout_j1_batch[i]))
+
 	return target_q_batch
 
 
